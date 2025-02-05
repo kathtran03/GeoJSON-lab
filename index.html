@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <title>ADA Information Points in Washington State Parks</title>
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+        <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
+        <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
+        <style>
+            body {
+    margin: 0;
+    padding: 0;
+    background-color: #FFF5EE;
+    font-family: Arial, sans-serif;
+    
+}
+
+#container {
+    display: flex;
+    height: 100vh;
+    flex-direction: row-reverse;
+    align-items: stretch;
+}
+
+#side-panel {
+    flex-basis: 700px;
+    overflow-y: scroll;
+    text-align: center;
+    
+}
+
+#map {
+    flex-grow: 1;
+}
+
+button {
+            margin-bottom: 10px;
+            font-size: 18px; /* Increase font size */
+            width: auto; /* Adjust width as needed */
+            text-align: left; /* Align text to the left */
+            display: block; /* Ensure the button takes up the full width */
+            margin-left: 10px; /* Align the button to the left */
+        }
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    border: 10px solid #FFDEAD;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 16px;
+}
+
+tr:nth-child(even) {
+    background-color: #FFDEAD;
+}
+
+.underline {
+            text-decoration: underline;
+        }
+
+@media (max-width: 1024px) {
+            #side-panel {
+                display: none;
+            }
+}
+        </style>
+    </head> 
+    <body>
+        <main id="container">
+            <div id="side-panel">
+     
+                <h2>ADA Information Points in Washington State Parks</h2>
+                <button>Sort by ADA Features</button>
+     
+                <table>
+                    <tr>
+                        <th class="underline">Site Name</th> <!-- Underline table headers -->
+                    <th class="underline">ADA Feature List</th>
+                    <th class="underline">Longitude</th>
+                    <th class="underline">Latitude</th>
+                    </tr>
+                </table>
+     
+            </div>
+            <div id="map"></div>
+        </main>
+        <script>
+             mapboxgl.accessToken = 'pk.eyJ1Ijoia2F0aHRyYW4wMyIsImEiOiJjbTZyNTBhYWMxdTQ5MmxvZ21uNnpsZ3hwIn0.f30WG6FD1y-ljfmkn-6y7g';
+             let map = new mapboxgl.Map({
+    container: 'map', // container ID
+    style: 'mapbox://styles/mapbox/outdoors-v12', // style URL
+    zoom: 6.7, // starting zoom
+    center: [-120.740135, 47.751076] // starting center
+});
+
+async function geojsonFetch() {
+    let response, ADA, washington, table;
+    response = await fetch('assets/ADA_Information_Points.geojson');
+    ADA = await response.json();
+    response = await fetch('assets/WA_State_Boundary.geojson');
+    washington = await response.json();
+
+    //load data to the map as new layers and table on the side.
+map.on('load', function loadingData() {
+
+map.addSource('ADA', {
+    type: 'geojson',
+    data: ADA
+});
+
+map.addLayer({
+    'id': 'ADA-layer',
+    'type': 'circle',
+    'source': 'ADA',
+    'paint': {
+        'circle-radius': 8,
+        'circle-stroke-width': 2,
+        'circle-color': 'red',
+        'circle-stroke-color': 'white'
+    }
+});
+
+
+map.addSource('washington', {
+    type: 'geojson',
+    data: washington
+});
+
+map.addLayer({
+    'id': 'washington-layer',
+    'type': 'fill',
+    'source': 'washington',
+    'paint': {
+        'fill-color': '#808080', // blue color fill
+        'fill-opacity': 0.5
+    }
+
+    
+});
+table = document.getElementsByTagName("table")[0];
+let row, cell1, cell2, cell3;
+for (let i = 0; i < ADA.features.length; i++) {
+    // Create an empty <tr> element and add it to the 1st position of the table:
+    row = table.insertRow(-1);
+    cell1 = row.insertCell(0);
+    cell2 = row.insertCell(1);
+    cell3 = row.insertCell(2);
+    cell4 = row.insertCell(3);
+    cell1.innerHTML = ADA.features[i].properties.SiteName;
+    cell2.innerHTML = ADA.features[i].properties.ADA_FeatureList;
+    cell3.innerHTML = ADA.features[i].properties.Longitude;
+    cell4.innerHTML = ADA.features[i].properties.Latitude;
+}
+
+let btn = document.getElementsByTagName("button")[0];
+btn.addEventListener('click', sortTable);
+
+function sortTable() {
+                let rows, switching, i, x, y, shouldSwitch;
+                switching = true;
+                /* Make a loop that will continue until
+                no switching has been done: */
+                while (switching) {
+                    // Start by saying: no switching is done:
+                    switching = false;
+                    rows = table.rows;
+                    /* Loop through all table rows (except the
+                    first, which contains table headers): */
+                    for (i = 1; i < (rows.length - 1); i++) {
+                        // Start by saying there should be no switching:
+                        shouldSwitch = false;
+                        /* Get the two elements you want to compare,
+                        one from current row and one from the next: */
+                        x = rows[i].getElementsByTagName("td")[1];
+                        y = rows[i + 1].getElementsByTagName("td")[1];
+                        // Check if the two rows should switch place:
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            // If so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                    if (shouldSwitch) {
+                        /* If a switch has been marked, make the switch
+                        and mark that a switch has been done: */
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+        }
+    }
+}
+
+});
+};
+
+geojsonFetch();
+
+        </script>
+     </body>   
+<html>    
