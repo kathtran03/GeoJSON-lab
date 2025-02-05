@@ -12,6 +12,7 @@
     padding: 0;
     background-color: #FFF5EE;
     font-family: Arial, sans-serif;
+    font-size: 16px; /* Increase font size */
     
 }
 
@@ -23,7 +24,7 @@
 }
 
 #side-panel {
-    flex-basis: 700px;
+    flex-basis: 550px;
     overflow-y: scroll;
     text-align: center;
     
@@ -35,11 +36,10 @@
 
 button {
             margin-bottom: 10px;
-            font-size: 18px; /* Increase font size */
-            width: auto; /* Adjust width as needed */
-            text-align: left; /* Align text to the left */
-            display: block; /* Ensure the button takes up the full width */
-            margin-left: 10px; /* Align the button to the left */
+            font-size: 15px; 
+            text-align: left; 
+            display: block; 
+            margin-left: 10px; 
         }
 
 table {
@@ -94,7 +94,7 @@ tr:nth-child(even) {
              let map = new mapboxgl.Map({
     container: 'map', // container ID
     style: 'mapbox://styles/mapbox/outdoors-v12', // style URL
-    zoom: 5.8, // starting zoom
+    zoom: 5.5, // starting zoom
     center: [-120.740135, 47.751076] // starting center
 });
 
